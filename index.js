@@ -61,40 +61,36 @@ const db = {
   joined: [],
   loads: [],
   insertLeft(message) {
+    const { loadId } = message
     this.left.push(message)
     const right = find(
       this.right,
-      r => r.id === message.id && r.loadId === message.loadId
+      r => r.id === message.id && r.loadId === loadId
     )
     if (right) {
       this.joined.push({ ...message, ...right })
     }
-    const { leftCount, rightCount } = find(
-      this.loads,
-      l => l.id === message.loadId
-    )
+    const { leftCount, rightCount } = find(this.loads, l => l.id === loadId)
     if (
-      leftCount === sumBy(this.left, l => l.loadId === message.loadId) &&
-      rightCount === sumBy(this.right, r => r.loadId === message.loadId)
+      leftCount === sumBy(this.left, l => l.loadId === loadId) &&
+      rightCount === sumBy(this.right, r => r.loadId === loadId)
     )
       this.finish()
   },
   insertRight(message) {
+    const { loadId } = message
     this.right.push(message)
     const left = find(
       this.left,
-      l => l.id === message.id && l.loadId === message.loadId
+      l => l.id === message.id && l.loadId === loadId
     )
     if (left) {
       this.joined.push({ ...message, ...left })
     }
-    const { leftCount, rightCount } = find(
-      this.loads,
-      l => l.id === message.loadId
-    )
+    const { leftCount, rightCount } = find(this.loads, l => l.id === loadId)
     if (
-      leftCount === sumBy(this.left, l => l.loadId === message.loadId) &&
-      rightCount === sumBy(this.right, r => r.loadId === message.loadId)
+      leftCount === sumBy(this.left, l => l.loadId === loadId) &&
+      rightCount === sumBy(this.right, r => r.loadId === loadId)
     )
       this.finish()
   },
