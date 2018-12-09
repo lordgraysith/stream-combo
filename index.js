@@ -1,7 +1,7 @@
 const faker = require('faker')
 const uuid = require('uuid')
 const Bluebird = require('bluebird')
-const { range, map, find, differenceBy, sumBy } = require('lodash')
+const { range, map, find, differenceBy, sumBy, filter } = require('lodash')
 
 let done = false
 
@@ -38,7 +38,7 @@ function consumeLeft(part, offset) {
     id: message.id,
     loadId: message.loadId
   })
-  setTimeout(consumeLeft, Math.random() * 1000, part, offset + 1)
+  setTimeout(consumeLeft, Math.random() * 10, part, offset + 1)
 }
 
 function consumeRight(part, offset) {
@@ -49,12 +49,13 @@ function consumeRight(part, offset) {
     id: message.id,
     loadId: message.loadId
   })
-  setTimeout(consumeRight, Math.random() * 1000, part, offset + 1)
+  setTimeout(consumeRight, Math.random() * 10, part, offset + 1)
 }
 
 function consumeStart(message) {
   db.insertLoad(message)
 }
+
 const db = {
   left: [],
   right: [],
@@ -75,7 +76,7 @@ const db = {
       leftCount === sumBy(this.left, l => l.loadId === loadId) &&
       rightCount === sumBy(this.right, r => r.loadId === loadId)
     )
-      this.finish()
+      this.finish(loadId)
   },
   insertRight(message) {
     const { loadId } = message
@@ -92,14 +93,16 @@ const db = {
       leftCount === sumBy(this.left, l => l.loadId === loadId) &&
       rightCount === sumBy(this.right, r => r.loadId === loadId)
     )
-      this.finish()
+      this.finish(loadId)
   },
   insertLoad(details) {
     this.loads.push(details)
   },
-  finish() {
-    const remainingLeft = differenceBy(this.left, this.joined, i => i.id)
-    const remainingRight = differenceBy(this.right, this.joined, i => i.id)
+  finish(loadId) {
+    const left = filter(this.left, l => l.loadId === loadId)
+    const right = filter(this.right, r => r.loadId === loadId)
+    const remainingLeft = differenceBy(left, this.joined, i => i.id)
+    const remainingRight = differenceBy(right, this.joined, i => i.id)
     this.joined = this.joined.concat(remainingLeft).concat(remainingRight)
     done = true
   }
